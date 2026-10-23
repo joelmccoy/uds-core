@@ -1,0 +1,25 @@
+# Copyright 2026 Defense Unicorns
+# SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Defense-Unicorns-Commercial
+
+# Synthetic inputs only. These are not deployed images.
+istio:
+  upstream:
+    # renovate-poc: mock.upstream.invalid/istio/pilot
+    image: mock.upstream.invalid/istio/pilot:1.31.1-distroless
+  registry1:
+    # renovate-poc: mock.registry1.invalid/istio/pilot
+    image: mock.registry1.invalid/istio/pilot:1.31.1-fips
+  unicorn:
+    # renovate-poc: mock.chainguard.invalid/istio/pilot
+    image: mock.chainguard.invalid/istio/pilot:v1.31.1
+
+authservice:
+  upstream:
+    # renovate-poc: mock.upstream.invalid/authservice
+    image: mock.upstream.invalid/authservice:1.1.8
+  registry1:
+    # renovate-poc: mock.registry1.invalid/authservice
+    image: mock.registry1.invalid/authservice:1.1.8-fips
+  unicorn:
+    # renovate-poc: mock.chainguard.invalid/authservice
+    image: mock.chainguard.invalid/authservice:v1.1.8

@@ -1,0 +1,51 @@
+{
+  "mocked": true,
+  "families": [
+    {
+      "id": "istio",
+      "members": [
+        {
+          "flavor": "upstream",
+          "packageName": "mock.upstream.invalid/istio/pilot",
+          "tagPattern": "^(?<version>\\d+\\.\\d+\\.\\d+)-distroless$",
+          "tags": ["1.31.1-distroless", "1.31.2-distroless", "1.31.3-distroless"]
+        },
+        {
+          "flavor": "registry1",
+          "packageName": "mock.registry1.invalid/istio/pilot",
+          "tagPattern": "^(?<version>\\d+\\.\\d+\\.\\d+)-fips$",
+          "tags": ["1.31.1-fips", "1.31.2-fips"]
+        },
+        {
+          "flavor": "unicorn",
+          "packageName": "mock.chainguard.invalid/istio/pilot",
+          "tagPattern": "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
+          "tags": ["v1.31.1", "v1.31.2"]
+        }
+      ]
+    },
+    {
+      "id": "authservice",
+      "members": [
+        {
+          "flavor": "upstream",
+          "packageName": "mock.upstream.invalid/authservice",
+          "tagPattern": "^(?<version>\\d+\\.\\d+\\.\\d+)$",
+          "tags": ["1.1.8", "1.1.9"]
+        },
+        {
+          "flavor": "registry1",
+          "packageName": "mock.registry1.invalid/authservice",
+          "tagPattern": "^(?<version>\\d+\\.\\d+\\.\\d+)-fips$",
+          "tags": ["1.1.8-fips"]
+        },
+        {
+          "flavor": "unicorn",
+          "packageName": "mock.chainguard.invalid/authservice",
+          "tagPattern": "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
+          "tags": ["v1.1.8"]
+        }
+      ]
+    }
+  ]
+}

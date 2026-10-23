@@ -1,0 +1,109 @@
+# Copyright 2026 Defense Unicorns
+# SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Defense-Unicorns-Commercial
+
+name: Renovate image alignment POC
+
+on:
+  pull_request:
+    paths:
+      - scripts/renovate/poc/**
+      - .github/workflows/renovate-poc.yaml
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Create/update the POC dependency PR and dashboard issue
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renovate-image-alignment-poc
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.repository == 'joelmccoy/uds-core'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+      - name: Test the mocked flow
+        run: node --test scripts/renovate/poc/poc.test.mjs
+
+  renovate:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'joelmccoy/uds-core' &&
+      github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      POC_APPLY: ${{ inputs.apply }}
+      POC_BASE_BRANCH: main
+      POC_REPOSITORY: joelmccoy/uds-core
+      POC_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+      - name: Create optional GitHub App token
+        id: app
+        if: vars.RENOVATE_POC_APP_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.RENOVATE_POC_APP_ID }}
+          private-key: ${{ secrets.RENOVATE_POC_APP_PRIVATE_KEY }}
+          owner: joelmccoy
+          repositories: uds-core
+      - name: Start mock publisher API
+        run: |
+          node scripts/renovate/poc/poc.mjs serve > "$RUNNER_TEMP/poc-mock.log" 2>&1 &
+          for attempt in {1..30}; do
+            if curl --noproxy '*' --fail --silent http://127.0.0.1:8765/healthz; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
+      - name: Discover shared versions and prepare isolated config
+        run: node scripts/renovate/poc/poc.mjs prepare
+      - name: Run Renovate against demo pins only
+        uses: renovatebot/github-action@f0f41e5f2e706165f6814b1d0f0d0e319de7d1d9 # v46.3.8
+        with:
+          configurationFile: scripts/renovate/poc/out/config.json
+          renovate-version: "44.178.1"
+          docker-network: host
+          token: ${{ steps.app.outputs.token || github.token }}
+        env:
+          LOG_LEVEL: debug
+          NO_PROXY: localhost,127.0.0.1,::1
+          no_proxy: localhost,127.0.0.1,::1
+      - name: Render or publish dashboard
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          POC_FAILED: ${{ failure() }}
+        run: node scripts/renovate/poc/poc.mjs dashboard
+      - name: Publish preview in workflow summary
+        if: always()
+        run: |
+          if [[ -f scripts/renovate/poc/out/dashboard.md ]]; then
+            python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          from pathlib import Path
+          print(Path('scripts/renovate/poc/out/dashboard.md').read_text())
+          PY
+          fi

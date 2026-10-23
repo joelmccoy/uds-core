@@ -5,13 +5,13 @@
 istio:
   upstream:
     # renovate-poc: mock.upstream.invalid/istio/pilot
-    image: mock.upstream.invalid/istio/pilot:1.31.1-distroless
+    image: mock.upstream.invalid/istio/pilot:1.31.2-distroless
   registry1:
     # renovate-poc: mock.registry1.invalid/istio/pilot
-    image: mock.registry1.invalid/istio/pilot:1.31.1-fips
+    image: mock.registry1.invalid/istio/pilot:1.31.2-fips
   unicorn:
     # renovate-poc: mock.chainguard.invalid/istio/pilot
-    image: mock.chainguard.invalid/istio/pilot:v1.31.1
+    image: mock.chainguard.invalid/istio/pilot:v1.31.2
 
 authservice:
   upstream:

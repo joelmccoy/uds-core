@@ -91,12 +91,11 @@ jobs:
         env:
           LOG_LEVEL: debug
           NO_PROXY: localhost,127.0.0.1,::1
-          no_proxy: localhost,127.0.0.1,::1
       - name: Render or publish dashboard
         if: always()
         env:
           GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
-          POC_FAILED: ${{ failure() }}
+          POC_FAILED: ${{ job.status != 'success' }}
         run: node scripts/renovate/poc/poc.mjs dashboard
       - name: Publish preview in workflow summary
         if: always()

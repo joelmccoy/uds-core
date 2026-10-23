@@ -164,7 +164,7 @@ export function buildConfig(
         repository,
         baseBranchPatterns: [baseBranch],
         enabledManagers: ["custom.regex"],
-        branchPrefix: "renovate-poc/",
+        branchPrefix: baseBranch === "main" ? "renovate-poc/main/" : "renovate-poc/",
         dependencyDashboard: false,
         automerge: false,
         prCreation: "immediate",
